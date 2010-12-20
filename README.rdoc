@@ -1,6 +1,6 @@
 = credit_officer
 
-Description goes here.
+An ActiveModel port of ActiveMerchant's credit card validations.
 
 == Contributing to credit_officer
  
