@@ -4,6 +4,7 @@ module CreditOfficer
   class Base
     extend ActiveModel::Naming
     include ActiveModel::Validations
+    extend ActiveModel::Translation
     
     def initialize(attributes = {})
 
