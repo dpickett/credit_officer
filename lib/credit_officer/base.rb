@@ -24,5 +24,10 @@ module CreditOfficer
     def to_param
       nil
     end
+    
+    protected
+    def translate(key, options = {})
+      I18n.t key, options
+    end
   end
 end

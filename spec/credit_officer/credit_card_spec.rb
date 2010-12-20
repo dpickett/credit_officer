@@ -9,18 +9,22 @@ describe CreditOfficer::CreditCard do
   should_validate_presence_of :expiration_year
   
   it "validates that the expiration year is on or after this year" do
-   pending
    subject.expiration_year = Time.now.year - 1 
-   subject.valid?.should be_false
+   subject.should_not be_valid
    subject.errors[:expiration_year].should_not be_blank
   end
   
   it "validates that the expiration year is within 20 years from now" do
-    pending
-    subject.expiration_year = Time.now.year + 20
-    subject.valid?.should be_false
+    subject.expiration_year = Time.now.utc.year + 20
+    subject.should_not be_valid
     subject.errors[:expiration_year].should_not be_blank
   end
   
-  it "validates that the expiration month and year is in the future"
+  it "validates that the expiration month and year is in the future" do
+    Timecop.travel(Time.utc(2010, 11, 1, 1))
+    subject.expiration_year = "2010"
+    subject.expiration_month = "10"
+    subject.should_not be_valid
+    subject.errors[:expiration_year].should_not be_blank
+  end
 end
