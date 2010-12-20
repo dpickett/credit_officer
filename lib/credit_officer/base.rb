@@ -2,11 +2,11 @@ require "active_model"
 
 module CreditOfficer
   class Base
-    attr_reader :errors
     extend ActiveModel::Naming
+    include ActiveModel::Validations
     
     def initialize(attributes = {})
-      @errors = ActiveModel::Errors.new(self)
+
     end
     
     def to_model
@@ -23,10 +23,6 @@ module CreditOfficer
     
     def to_param
       nil
-    end
-    
-    def valid?
-      errors.empty?
     end
   end
 end

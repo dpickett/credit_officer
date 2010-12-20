@@ -9,6 +9,7 @@ gem "activemodel", ">= 3.0.3"
 
 group :development do
   gem "rspec", "~> 2.3.0"
+  gem "remarkable_activemodel", ">=4.0.0.alpha4"
   gem "yard", "~> 0.6.0"
   gem "bundler", "~> 1.0.0"
   gem "jeweler", "~> 1.5.1"
