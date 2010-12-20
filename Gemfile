@@ -10,6 +10,7 @@ gem "activemodel", ">= 3.0.3"
 group :development do
   gem "timecop", "0.3.5"
   gem "ruby-debug"
+  gem "factory_girl"
   gem "rspec", "~> 2.3.0"
   gem "remarkable_activemodel", ">=4.0.0.alpha4"
   gem "yard", "~> 0.6.0"
