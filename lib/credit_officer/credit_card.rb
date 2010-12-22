@@ -76,11 +76,13 @@ module CreditOfficer
     self.supported_providers = PROVIDERS_AND_FORMATS.keys
 
     protected
+    I18N_ERROR_SCOPE = [:credit_officer, :errors, :messages]
+
     def expiration_date_is_in_future
       if expiration_date.expired?
         errors.add(:expiration_year, 
           translate(:expired, 
-            :scope   => [:credit_officer, :errors, :messages], 
+            :scope   => I18N_ERROR_SCOPE, 
             :default => "is expired"))
       end
     end
@@ -88,7 +90,7 @@ module CreditOfficer
     def expiration_date_is_in_recent_future
       if expiration_date.exceeds_recent_future?
         errors.add(:expiration_year, translate(:exceeds_recent_future, 
-          :scope   => [:credit_officer, :errors, :messages], 
+          :scope   => I18N_ERROR_SCOPE, 
           :default => "is not a valid year"))
       end
     end
@@ -100,7 +102,7 @@ module CreditOfficer
           !checksum_valid?
 
           errors.add(:number, translate(:invalid_format, 
-            :scope   => [:credit_officer, :errors,  :messages], 
+            :scope   => I18N_ERROR_SCOPE, 
             :default => "is not a valid card number"))
         end
       end
@@ -109,7 +111,7 @@ module CreditOfficer
     def provider_name_is_supported
       unless self.class.supported_providers.include?(provider_name.downcase)
         errors.add(:provider_name, translate(:unsupported_provider,
-          :scope   => [:credit_officer, :errors, :messages],
+          :scope   => I18N_ERROR_SCOPE,
           :default => "is not supported"))
       end
     end
