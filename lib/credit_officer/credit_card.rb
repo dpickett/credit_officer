@@ -78,12 +78,12 @@ module CreditOfficer
     end
     
     def expiration_date
-      CreditOfficer::Date.new(:month => expiration_month, 
+      CreditOfficer::MonthYearPair.new(:month => expiration_month, 
         :year => expiration_year)
     end
 
     def start_date
-      CreditOfficer::Date.new(:month => start_month,
+      CreditOfficer::MonthYearPair.new(:month => start_month,
         :year => start_year)
     end
     

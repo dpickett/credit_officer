@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe CreditOfficer::Date do
+describe CreditOfficer::MonthYearPair do
   should_validate_presence_of :year
   should_validate_inclusion_of :month, :in => 1..12
 
-  subject { Factory.build(:credit_date) }
+  subject { Factory.build(:month_year_pair) }
 
   it "indicates when the end of the month is in the past" do
     freeze_time do

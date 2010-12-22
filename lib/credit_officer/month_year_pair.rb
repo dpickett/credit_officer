@@ -1,7 +1,7 @@
 require 'active_support/core_ext/time/calculations'
 
 module CreditOfficer
-  class Date < Base
+  class MonthYearPair < Base
     attr_accessor :year
     attr_accessor :month
 

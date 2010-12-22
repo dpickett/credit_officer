@@ -15,7 +15,7 @@ Factory.define :switch_credit_card, :parent => :credit_card do |c|
   c.issue_number "01"
 end
 
-Factory.define :credit_date, :class => CreditOfficer::Date do |c|
+Factory.define :month_year_pair, :class => CreditOfficer::MonthYearPair do |c|
   c.month 1
   c.year 2010
 end
