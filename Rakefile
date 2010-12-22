@@ -15,8 +15,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "credit_officer"
   gem.homepage = "http://github.com/dpickett/credit_officer"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{An activemodel compliant credit card validator}
+  gem.description = %Q{An upgrade/port of ActiveMerchant's credit card class}
   gem.email = "dpickett@enlightsolutions.com"
   gem.authors = ["Dan Pickett"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
