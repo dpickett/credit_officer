@@ -1,10 +1,89 @@
 = credit_officer
 
-An ActiveModel port of ActiveMerchant's credit card validations.
+An ActiveModel port of ActiveMerchant's credit card validations. 
+
+Use only with Rails 3/ActiveModel supported applications
 
 == The Basics
+
+Use this library so that you can validate credit card information before sending it to your payment processor
+
+Checks credit card number formats, checksums, and other required details. Supports i18n for better message
+customization
+
+  cc = CreditOfficer::CreditCard.new(
+    :number => "411111111111111",
+    :provider_name => "visa",
+    :name_on_card => "John Doe",
+    :expiration_year => 2010,
+    :expiration_month => 1,
+    :verification_value => "343"
+  }).valid? => true
+  
+  cc.number = ""
+  cc.valid? => false 
+  cc.errors.full_messages => ["Number can't be blank"]
+
 == Configuring verification
+  
+If you want to turn requiring verification values off, make it so:
+
+  CreditOfficer::CreditCard.require_verification_value = false
+  cc = CreditOfficer::CreditCard.new(
+    :number => "411111111111111",
+    :provider_name => "visa",
+    :name_on_card => "John Doe",
+    :expiration_year => 2010,
+    :expiration_month => 1,
+    :verification_value => ""
+  }).valid? => true
+
+
 == Configuring Providers
+
+Want to only support certain credit cards and card number formats? Make it so:
+
+  CreditOfficer::CreditCard.supported_providers = [
+    'mastercard',
+    'amex'
+  ]
+
+  cc = CreditOfficer::CreditCard.new(
+    :number => "411111111111111",
+    :provider_name => "visa",
+    :name_on_card => "John Doe",
+    :expiration_year => 2010,
+    :expiration_month => 1,
+    :verification_value => ""
+  }).valid? => false
+
+== i18n
+
+Error messages can be customized with i18n translations
+
+  credit_officer:
+    errors:
+       messages:
+         expired: "is expired"
+         exceeds_recent_future: "is not a valid year"
+         invalid_format: "is not a valid card number"
+         unsupported_provider: "is not supported"
+         invalid_issue_number: "is not valid"
+         futuristic_start_date: "is in the future"
+
+== Why?
+
+ActiveMerchant has a ton of functionality and it's a great library. I just wanted the ability to validate
+information before sending it to a payment processor. I don't want all the payment processor logic, etc
+bloating my applications. Lean, simple, extensible, and up to date - that's how I like it!
+
+I've also added some of the niceties that an activemodel compliant architecture provides (i18n, for example)
+
+== A note on persistence
+
+Do not store this data yourself unless you absolutely must. Your payment processors should have a way for you
+to transmit this information and have them store it for you. Otherwise, you're beholden to all kinds of
+PCI compliance issues.
 
 == Contributing to credit_officer
  

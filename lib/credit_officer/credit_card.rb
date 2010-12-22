@@ -21,6 +21,7 @@ module CreditOfficer
   #
   #  cc.number = ""
   #  cc.valid? => false 
+  #  cc.errors.full_messages => ["Number can't be blank"]
   class CreditCard < Base
     PROVIDERS_AND_FORMATS = [
       ['visa'               , /^4\d{12}(\d{3})?$/],
