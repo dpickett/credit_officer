@@ -3,6 +3,24 @@ require "active_support/ordered_hash"
 require "luhney_bin"
 
 module CreditOfficer
+  #ActiveModel compliant class that represents credit card information
+  #Use this to populate and validate credit card details
+  #
+  #It is not recommended that you persist credit card information unless
+  #you absolutely must. Many payment processors proviider you with a mechanism to
+  #store this private information
+  #
+  #@example
+  #  cc = CreditOfficer::CreditCard.new(
+  #    :number => "411111111111111",
+  #    :provider_name => "visa",
+  #    :name_on_card => "John Doe",
+  #    :expiration_year => 2010,
+  #    :expiration_month => 1
+  #  }).valid? => true
+  #
+  #  cc.number = ""
+  #  cc.valid? => false 
   class CreditCard < Base
     PROVIDERS_AND_FORMATS = [
       ['visa'               , /^4\d{12}(\d{3})?$/],
@@ -27,16 +45,34 @@ module CreditOfficer
       'solo'
     ]
     
+    #[String] the number found on card
     attr_accessor :number
+
+    #[String] the name found on the front of the card
     attr_accessor :name_on_card
+
+    #[Integer] the integer based representation of the month when the credit card expires (1-12 e.g)
     attr_accessor :expiration_month
+
+    #[Integer] the year when the credit card expires
+    #@note paired with the month, this must be in the future for the credit card to be valid
     attr_accessor :expiration_year
+
+    #[String] the CVV/CVV2 value found on the back or front of cards depending on their brand
+    #validation of this string can be turned off via class setting require_verification_value
     attr_accessor :verification_value
+
+    #[String] downcased name of the credit card provider 
+    #(see {PROVIDERS_AND_FORMATS} for a valid list
     attr_accessor :provider_name
     
-    #SOLO or Switch attributes
+    #[Integer] Solo or Switch card attribute representing the start date found on the card
     attr_accessor :start_month
+
+    #[Integer] Solo or Switch card attribute representing the start year found on the card
     attr_accessor :start_year
+
+    #[String] Solo or Switch Card attribute representing the issue number found on the card
     attr_accessor :issue_number
 
     alias_method :brand, :provider_name
@@ -70,39 +106,56 @@ module CreditOfficer
     validate :start_date_is_in_the_past,
       :if => proc{|cc| cc.switch_or_solo? }
 
+    #set this flag accordingly to enable/disable validating verification codes (CVV/CVV2)
     cattr_accessor :require_verification_value
     self.require_verification_value = true
  
+    #checks the configuration setting require_verification_value to see if 
+    #verification is required
     def self.verification_value_required?
       require_verification_value
     end
     
+    #@return [CreditOfficer::MonthYearPair] month year pair that represents the expiration date
     def expiration_date
       CreditOfficer::MonthYearPair.new(:month => expiration_month, 
         :year => expiration_year)
     end
 
+    #@return [CreditOfficer::MonthYearPair] month year pair that represents the start date
+    #@note this applies to switch and solo cards only
     def start_date
       CreditOfficer::MonthYearPair.new(:month => start_month,
         :year => start_year)
     end
     
+    #sets the provider name 
+    #@param [String] the provider name you wish to set
+    #sets the provider name to its downcased equivalent
+    #@example note the downcase
+    #  credit_card.provider_name = "VISA" => "visa"
     def provider_name=(provider)
       unless provider.nil?
         @provider_name = provider.downcase
       end
     end
     
+    #configure your list of supported providers
+    #@param Array<String> providers you wish to support (amex, visa, etc) (refer to {PROVIDERS_AND_FORMATS})
+    #@note matches specified providers against the supported whitelist {PROVIDERS_AND_FORMATS}
     def self.supported_providers=(providers)
       @supported_providers = providers.collect{|i| i.downcase} & PROVIDERS_AND_FORMATS.keys
     end
 
+    #@return [Array<String>] list of providers
+    #@note defaults to {PROVIDERS_AND_FORMATS}.keys
     def self.supported_providers
       @supported_providers
     end
 
     self.supported_providers = PROVIDERS_AND_FORMATS.keys
 
+    #@return [Boolean] whether or not the provider name indicates the card is a switch or solo card
     def switch_or_solo?
       SWITCH_OR_SOLO_PROVIDERS.include?(provider_name)
     end
