@@ -38,20 +38,18 @@ module CreditOfficer
       :if => proc{|p| p.class.verification_value_required? }
     
     validates_inclusion_of :expiration_month, 
-      :in => 1..12
-    
-    validates_inclusion_of :provider_name,
-      :in => PROVIDERS_AND_FORMATS.keys
-    
+      :in => 1..12  
+
     validates_presence_of :expiration_year
     
     validate :expiration_date_is_in_future
     validate :expiration_date_is_in_recent_future
     validate :number_is_valid
+    validate :provider_name_is_supported
     
     cattr_accessor :require_verification_value
     self.require_verification_value = true
-
+ 
     def self.verification_value_required?
       require_verification_value
     end
@@ -67,29 +65,67 @@ module CreditOfficer
       end
     end
     
+    def self.supported_providers=(providers)
+      @supported_providers = providers.collect{|i| i.downcase} & PROVIDERS_AND_FORMATS.keys
+    end
+
+    def self.supported_providers
+      @supported_providers
+    end
+
+    self.supported_providers = PROVIDERS_AND_FORMATS.keys
+
     protected
     def expiration_date_is_in_future
       if expiration_date.expired?
-        errors.add(:expiration_year, translate(:expired, :scope => [:credit_officer, :errors, :messages], :default => "is expired"))
+        errors.add(:expiration_year, 
+          translate(:expired, 
+            :scope   => [:credit_officer, :errors, :messages], 
+            :default => "is expired"))
       end
     end
     
     def expiration_date_is_in_recent_future
       if expiration_date.exceeds_recent_future?
-        errors.add(:expiration_year, translate(:exceeds_recent_future, :scope => [:credit_officer, :errors, :messages], :default => "is not a valid year"))
+        errors.add(:expiration_year, translate(:exceeds_recent_future, 
+          :scope   => [:credit_officer, :errors, :messages], 
+          :default => "is not a valid year"))
       end
     end
     
     def number_is_valid
       if provider_name.present? && number.present? 
-        if PROVIDERS_AND_FORMATS[provider_name].nil? || !(number =~ PROVIDERS_AND_FORMATS[provider_name]) || !checksum_valid?
-          errors.add(:number, translate(:invalid_format, :scope => [:credit_officer, :errors,  :messages], :default => "is not a valid card number"))
+        if self.class.supported_providers_and_formats[provider_name].nil? || 
+          !(number =~ self.class.supported_providers_and_formats[provider_name]) || 
+          !checksum_valid?
+
+          errors.add(:number, translate(:invalid_format, 
+            :scope   => [:credit_officer, :errors,  :messages], 
+            :default => "is not a valid card number"))
         end
+      end
+    end
+
+    def provider_name_is_supported
+      unless self.class.supported_providers.include?(provider_name.downcase)
+        errors.add(:provider_name, translate(:unsupported_provider,
+          :scope   => [:credit_officer, :errors, :messages],
+          :default => "is not supported"))
       end
     end
 
     def checksum_valid?
       LuhneyBin.validate(number)
+    end
+
+    def self.supported_providers_and_formats
+      #match supported providers against constant's whitelist
+      valid_supported_providers = supported_providers & PROVIDERS_AND_FORMATS.keys
+
+      supported_providers.inject(ActiveSupport::OrderedHash.new) do |ordered_hash, provider_name|
+        ordered_hash[provider_name] = PROVIDERS_AND_FORMATS[provider_name]
+        ordered_hash
+      end
     end
   end
 end
