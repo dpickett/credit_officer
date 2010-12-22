@@ -11,7 +11,7 @@ module CreditOfficer
   #store this private information
   #
   #@example
-  #  cc = CreditOfficer::CreditCard.new(
+  #  cc = CreditOfficer::CreditCard.new({
   #    :number => "411111111111111",
   #    :provider_name => "visa",
   #    :name_on_card => "John Doe",

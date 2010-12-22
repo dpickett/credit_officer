@@ -11,7 +11,7 @@ Use this library so that you can validate credit card information before sending
 Checks credit card number formats, checksums, and other required details. Supports i18n for better message
 customization
 
-  cc = CreditOfficer::CreditCard.new(
+  cc = CreditOfficer::CreditCard.new({
     :number => "411111111111111",
     :provider_name => "visa",
     :name_on_card => "John Doe",
@@ -29,7 +29,7 @@ customization
 If you want to turn requiring verification values off, make it so:
 
   CreditOfficer::CreditCard.require_verification_value = false
-  cc = CreditOfficer::CreditCard.new(
+  cc = CreditOfficer::CreditCard.new({
     :number => "411111111111111",
     :provider_name => "visa",
     :name_on_card => "John Doe",
@@ -48,7 +48,7 @@ Want to only support certain credit cards and card number formats? Make it so:
     'amex'
   ]
 
-  cc = CreditOfficer::CreditCard.new(
+  cc = CreditOfficer::CreditCard.new({
     :number => "411111111111111",
     :provider_name => "visa",
     :name_on_card => "John Doe",
