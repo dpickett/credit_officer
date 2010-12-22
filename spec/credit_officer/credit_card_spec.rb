@@ -49,10 +49,15 @@ describe CreditOfficer::CreditCard do
   end
   
   it "validates the credit card number based on its provider name's format" do
-    pending
     subject.provider_name = 'visa'
     subject.number = '68293421'
     subject.should_not be_valid
-      subject.errors[:number].should_not be_blank
+    subject.errors[:number].should_not be_blank
+  end
+  
+  it "should check the checksum of the number" do
+    subject.number = "4123456789012345"
+    subject.should_not be_valid
+    subject.errors[:number].should_not be_blank
   end
 end

@@ -21,6 +21,7 @@ GEM
       git (>= 1.2.5)
       rake
     linecache (0.43)
+    luhney_bin (0.1.0)
     rake (0.8.7)
     rcov (0.9.9)
     reek (1.2.8)
@@ -67,6 +68,7 @@ DEPENDENCIES
   factory_girl
   fuubar
   jeweler (~> 1.5.1)
+  luhney_bin
   rcov
   reek (~> 1.2.8)
   remarkable_activemodel (>= 4.0.0.alpha4)

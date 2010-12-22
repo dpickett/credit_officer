@@ -6,6 +6,7 @@ source "http://rubygems.org"
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 gem "activemodel", ">= 3.0.3"
+gem "luhney_bin"
 
 group :development do
   gem "timecop", "0.3.5"

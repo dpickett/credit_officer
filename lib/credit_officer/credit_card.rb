@@ -1,5 +1,6 @@
 require "active_support/core_ext/class/attribute_accessors"
 require "active_support/ordered_hash"
+require "luhney_bin"
 
 module CreditOfficer
   class CreditCard < Base
@@ -28,17 +29,25 @@ module CreditOfficer
     attr_accessor :verification_value
     attr_accessor :provider_name
     
+    alias_method :brand, :provider_name
+    
     validates_presence_of :number
     validates_presence_of :name_on_card
+    
     validates_presence_of :verification_value, 
       :if => proc{|p| p.class.verification_value_required? }
+    
     validates_inclusion_of :expiration_month, 
       :in => 1..12
+    
     validates_inclusion_of :provider_name,
       :in => PROVIDERS_AND_FORMATS.keys
+    
     validates_presence_of :expiration_year
+    
     validate :expiration_date_is_in_future
     validate :expiration_date_is_in_recent_future
+    validate :number_is_valid
     
     cattr_accessor :require_verification_value
     self.require_verification_value = true
@@ -69,6 +78,18 @@ module CreditOfficer
       if expiration_date.exceeds_recent_future?
         errors.add(:expiration_year, translate(:exceeds_recent_future, :scope => [:credit_officer, :errors, :messages], :default => "is not a valid year"))
       end
+    end
+    
+    def number_is_valid
+      if provider_name.present? && number.present? 
+        if PROVIDERS_AND_FORMATS[provider_name].nil? || !(number =~ PROVIDERS_AND_FORMATS[provider_name]) || !checksum_valid?
+          errors.add(:number, translate(:invalid_format, :scope => [:credit_officer, :errors,  :messages], :default => "is not a valid card number"))
+        end
+      end
+    end
+
+    def checksum_valid?
+      LuhneyBin.validate(number)
     end
   end
 end
