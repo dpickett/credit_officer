@@ -84,4 +84,44 @@ describe CreditOfficer::CreditCard do
       subject.class.supported_providers.should eql(subject.class::PROVIDERS_AND_FORMATS.keys)
     end
   end
+
+  context "switch or solo cards" do
+    subject { Factory.build(:switch_credit_card) } 
+   
+    it { should be_valid }
+
+    it "is switch or solo if the provider name reflects that" do
+      [
+        "switch",
+        "solo"
+      ].each do |provider_name|
+        subject.provider_name = provider_name
+        subject.should be_switch_or_solo
+      end
+    end
+
+    it "requires a start month" do
+      subject.start_month = ""
+      subject.should_not be_valid
+      subject.errors[:start_month].should_not be_blank
+    end
+
+    it "requires a start year" do
+      subject.start_year = ""
+      subject.should_not be_valid
+      subject.errors[:start_year].should_not be_blank
+    end
+
+    it "requires a valid issue number" do
+      subject.issue_number = ""
+      subject.should_not be_valid
+      subject.errors[:issue_number].should_not be_blank
+    end
+
+    it "requires that the start month is not in the future" do
+      subject.start_year = Time.now.year + 1
+      subject.should_not be_valid
+      subject.errors[:start_year].should_not be_blank
+    end
+  end
 end

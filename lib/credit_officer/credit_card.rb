@@ -21,6 +21,11 @@ module CreditOfficer
       ordered_hash[name_format_pair[0]] = name_format_pair[1]
       ordered_hash
     end
+
+    SWITCH_OR_SOLO_PROVIDERS = [
+      'switch',
+      'solo'
+    ]
     
     attr_accessor :number
     attr_accessor :name_on_card
@@ -29,6 +34,11 @@ module CreditOfficer
     attr_accessor :verification_value
     attr_accessor :provider_name
     
+    #SOLO or Switch attributes
+    attr_accessor :start_month
+    attr_accessor :start_year
+    attr_accessor :issue_number
+
     alias_method :brand, :provider_name
     
     validates_presence_of :number
@@ -46,7 +56,20 @@ module CreditOfficer
     validate :expiration_date_is_in_recent_future
     validate :number_is_valid
     validate :provider_name_is_supported
+
+    #SOLO or Switch validations
+    validates_presence_of :start_month,
+      :if => proc{|cc| cc.switch_or_solo? }
+
+    validates_presence_of :start_year,
+      :if => proc{|cc| cc.switch_or_solo? }
     
+    validate :issue_number_is_valid,
+      :if => proc{|cc| cc.switch_or_solo? }
+
+    validate :start_date_is_in_the_past,
+      :if => proc{|cc| cc.switch_or_solo? }
+
     cattr_accessor :require_verification_value
     self.require_verification_value = true
  
@@ -55,8 +78,13 @@ module CreditOfficer
     end
     
     def expiration_date
-      ExpirationDate.new(:month => expiration_month, 
+      CreditOfficer::Date.new(:month => expiration_month, 
         :year => expiration_year)
+    end
+
+    def start_date
+      CreditOfficer::Date.new(:month => start_month,
+        :year => start_year)
     end
     
     def provider_name=(provider)
@@ -75,11 +103,15 @@ module CreditOfficer
 
     self.supported_providers = PROVIDERS_AND_FORMATS.keys
 
+    def switch_or_solo?
+      SWITCH_OR_SOLO_PROVIDERS.include?(provider_name)
+    end
+
     protected
     I18N_ERROR_SCOPE = [:credit_officer, :errors, :messages]
 
     def expiration_date_is_in_future
-      if expiration_date.expired?
+      if expiration_date.valid? && expiration_date.end_is_in_past?
         errors.add(:expiration_year, 
           translate(:expired, 
             :scope   => I18N_ERROR_SCOPE, 
@@ -88,7 +120,7 @@ module CreditOfficer
     end
     
     def expiration_date_is_in_recent_future
-      if expiration_date.exceeds_recent_future?
+      if expiration_date.valid? && expiration_date.exceeds_recent_future?
         errors.add(:expiration_year, translate(:exceeds_recent_future, 
           :scope   => I18N_ERROR_SCOPE, 
           :default => "is not a valid year"))
@@ -113,6 +145,22 @@ module CreditOfficer
         errors.add(:provider_name, translate(:unsupported_provider,
           :scope   => I18N_ERROR_SCOPE,
           :default => "is not supported"))
+      end
+    end
+
+    def issue_number_is_valid
+      unless issue_number =~ /^\d{1,2}$/
+        errors.add(:issue_number, translate(:invalid_issue_number,
+          :scope   => I18N_ERROR_SCOPE,
+          :default => "is not valid"))
+      end
+    end
+
+    def start_date_is_in_the_past
+      if start_date.valid? && start_date.start_is_in_future?
+        errors.add(:start_year, translate(:futuristic_start_date,
+          :scope => I18N_ERROR_SCOPE,
+          :default => "is in the future"))
       end
     end
 
