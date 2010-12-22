@@ -178,6 +178,12 @@ module CreditOfficer
         end
       end
     end
+
+    def masked_number
+      if number.present? && number.size >= 4
+        "X" * (number.size - 4) + number[-4..-1]
+      end
+    end
  
     protected
     def run_validations!

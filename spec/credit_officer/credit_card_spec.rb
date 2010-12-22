@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 describe CreditOfficer::CreditCard do
+  TEST_AMEX = "378282246310005"
+  TEST_MASTER = "5555555555554444"
+
   subject { Factory.build(:credit_card) }
   it_should_behave_like "ActiveModel"
   
@@ -125,10 +128,20 @@ describe CreditOfficer::CreditCard do
     end
   end
 
-  context "deriving provider name" do
-    TEST_AMEX = "378282246310005"
-    TEST_MASTER = "5555555555554444"
+  it "reveals the last 4 digits in your masked card number" do
+    subject.masked_number.should =~ /#{subject.number[-4..-1]}$/
+  end
 
+  it  "obfuscates all the digits except the last for in your masked card numbers" do 
+    subject.masked_number.should =~ /^#{"X" * (subject.number.size - 4)}/
+  end
+
+  it "returns a nil masked number if I don't have more than 4 digits in my credit card number" do
+    subject.number = ""
+    subject.masked_number.should be_nil
+  end
+
+  context "deriving provider name" do  
     it "derives visa from a visa formatted card number" do
       subject.provider_name = ""
       subject.derive_provider_name
