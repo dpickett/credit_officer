@@ -57,6 +57,29 @@ Want to only support certain credit cards and card number formats? Make it so:
     :verification_value => ""
   }).valid? => false
 
+== Deriving provider names
+
+Most of the time, you can derive the credit card provider (Mastercard, AMEX, Visa, etc) based on the format
+of the card number. By default, credit officer attempts to derive this provider name automatically
+
+  cc = CreditOfficer::CreditCard.new({
+    :number => "411111111111111",
+    :name_on_card => "John Doe",
+    :expiration_year => 2010,
+    :expiration_month => 1,
+  }).valid? => true
+
+  cc.provider_name => visa
+
+
+You can toggle this so that the user must provide a valid provider name like so:
+
+  CreditOfficer::CreditCard.automatically_derive_provider_name = false
+
+You can manually attempt the provider name like so (this will set the provider name according to your number):
+
+  cc.derive_provider_name
+
 == i18n
 
 Error messages can be customized with i18n translations

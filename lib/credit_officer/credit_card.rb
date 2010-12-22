@@ -91,7 +91,8 @@ module CreditOfficer
     
     validate :expiration_date_is_in_future
     validate :expiration_date_is_in_recent_future
-    validate :number_is_valid
+    validate :number_is_valid 
+
     validate :provider_name_is_supported
 
     #SOLO or Switch validations
@@ -107,9 +108,17 @@ module CreditOfficer
     validate :start_date_is_in_the_past,
       :if => proc{|cc| cc.switch_or_solo? }
 
-    #set this flag accordingly to enable/disable validating verification codes (CVV/CVV2)
+    #set this flag accordingly to enable/disable validating verification codes 
+    #(CVV/CVV2)
+    #@note defaults to true
     cattr_accessor :require_verification_value
     self.require_verification_value = true
+
+    #set this flag accordingly if you want CreditOfficer to attempt to derive 
+    #the provider name before validation takes place
+    #@note defaults to true
+    cattr_accessor :automatically_derive_provider_name
+    self.automatically_derive_provider_name = true
  
     #checks the configuration setting require_verification_value to see if 
     #verification is required
@@ -161,7 +170,21 @@ module CreditOfficer
       SWITCH_OR_SOLO_PROVIDERS.include?(provider_name)
     end
 
+    def derive_provider_name
+      self.class.supported_providers_and_formats.each do |name, format|
+        if number =~ format
+          self.provider_name = name
+          return
+        end
+      end
+    end
+ 
     protected
+    def run_validations!
+      derive_provider_name if self.class.automatically_derive_provider_name
+      super
+    end
+
     I18N_ERROR_SCOPE = [:credit_officer, :errors, :messages]
 
     def expiration_date_is_in_future
@@ -182,7 +205,8 @@ module CreditOfficer
     end
     
     def number_is_valid
-      if provider_name.present? && number.present? 
+      if (provider_name.present? || self.class.automatically_derive_provider_name) && 
+        number.present? 
         if self.class.supported_providers_and_formats[provider_name].nil? || 
           !(number =~ self.class.supported_providers_and_formats[provider_name]) || 
           !checksum_valid?
@@ -195,7 +219,9 @@ module CreditOfficer
     end
 
     def provider_name_is_supported
-      unless self.class.supported_providers.include?(provider_name.downcase)
+      if !self.class.automatically_derive_provider_name &&
+        !self.class.supported_providers.include?(provider_name.try(:downcase))
+
         errors.add(:provider_name, translate(:unsupported_provider,
           :scope   => I18N_ERROR_SCOPE,
           :default => "is not supported"))

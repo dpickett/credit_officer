@@ -65,14 +65,14 @@ describe CreditOfficer::CreditCard do
       old_supported_providers = subject.class.supported_providers.dup
       subject.class.supported_providers = ['master']
       subject.should_not be_valid
-      subject.errors[:provider_name].should_not be_blank
+      subject.errors[:number].should_not be_blank
 
       #reset supported providers
       subject.class.supported_providers = old_supported_providers
     end
 
     it "rejects a provider that is not in the whitelist" do
-      old_supported_providers = subject.class.supported_providers
+      old_supported_providers = subject.class.supported_providers.dup
       subject.class.supported_providers = ["gaga", "ohlala"]     
       subject.class.supported_providers.should be_empty
 
@@ -122,6 +122,44 @@ describe CreditOfficer::CreditCard do
       subject.start_year = Time.now.year + 1
       subject.should_not be_valid
       subject.errors[:start_year].should_not be_blank
+    end
+  end
+
+  context "deriving provider name" do
+    TEST_AMEX = "378282246310005"
+    TEST_MASTER = "5555555555554444"
+
+    it "derives visa from a visa formatted card number" do
+      subject.provider_name = ""
+      subject.derive_provider_name
+      subject.provider_name.should eql("visa")
+    end
+
+    it "derives master from a mastercard formatted number" do
+      subject.provider_name = ""
+      subject.number = TEST_MASTER
+      subject.derive_provider_name
+      subject.provider_name.should eql('master')
+    end
+
+    it "derives american express from an amex formatted number" do
+      subject.provider_name = ""
+      subject.number = TEST_AMEX
+      subject.derive_provider_name
+      subject.provider_name.should eql('american_express')
+    end
+
+    it "does not validate the provider name if provider name derivation is on" do
+      subject.provider_name = ""
+      subject.number = TEST_AMEX
+      subject.should be_valid
+      subject.provider_name.should eql('american_express')
+    end
+
+    it "should not set an error on provider name if the credit card number is invalid" do
+      subject.number = "fasdfas"
+      subject.should_not be_valid
+      subject.errors[:provider_name].should be_blank
     end
   end
 end
