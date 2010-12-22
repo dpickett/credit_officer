@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{credit_officer}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dan Pickett"]
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "credit_officer.gemspec",
     "lib/credit_officer.rb",
     "lib/credit_officer/base.rb",
     "lib/credit_officer/credit_card.rb",
