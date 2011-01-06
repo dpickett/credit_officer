@@ -38,7 +38,7 @@ module CreditOfficer
 
     #@return [Boolean] whether the last minute of the month is within the bound of {RECENT_FUTURE_YEAR_LIMIT}
     def exceeds_recent_future?
-      end_of_month <= Time.now.utc.advance(:years => RECENT_FUTURE_YEAR_LIMIT)
+      end_of_month >= Time.now.utc.advance(:years => RECENT_FUTURE_YEAR_LIMIT)
     end
 
     #@return [Time, nil] the first minute of the month in UTC or nil if an invalid pair was specified
