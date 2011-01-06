@@ -77,6 +77,8 @@ module CreditOfficer
     attr_accessor :issue_number
 
     alias_method :brand, :provider_name
+    alias_method :cvv, :verification_value
+    alias_method :cvv=, :verification_value=
     
     validates_presence_of :number
     validates_presence_of :name_on_card
